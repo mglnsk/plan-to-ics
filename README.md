@@ -16,3 +16,4 @@ pip install -r requirements.txt
 python3 create_ics.py
 ```
 
+Supported python versions: `3.10`, `3.11`, `3.12`
