@@ -16,7 +16,3 @@ pip install -r requirements.txt
 python3 create_ics.py
 ```
 
-
-### next steps:
-
-- [ ] web server
