@@ -24,20 +24,42 @@ HOUR_TRANSLATION = {
 # with open("plansoft.html", encoding='windows-1250') as f:
 #     tree = BeautifulSoup(f, 'html.parser')
 
-# with open("wmt.ics", "w") as cal:
-#     cal.write(IcsCalendarStream.calendar_to_ics(calendar))
+def create_calendar(hours: dict, days: dict) -> str:
+    calendar = Calendar()
+    for day_name in hours:
+        for hour_block in hours[day_name]:
+            for h_pos, event in enumerate(hours[day_name][hour_block]):
+                day_month = days[day_name][h_pos]
+                (day_of_the_month, month_number_roman) = day_month.split(" ")
+                month_number = ROMAN_TO_MONTH.index(month_number_roman) + 1
+                summary = event[0]
+                (start_hour, end_hour) = HOUR_TRANSLATION[hour_block]
+                year = datetime.now().year
 
-def GenerateIcal(plansoft: str) -> str:
-    tree = BeautifulSoup(plansoft, "html.parser")
-    trs = tree.find_all("tr")
+                if summary == "-":
+                    continue
 
+                print(f"{year}-{month_number}-{day_of_the_month}T{start_hour} ----- {summary}")
+                start_string = f"{year}-{month_number}-{day_of_the_month}T{start_hour}"
+                ev_start = datetime.strptime(start_string, "%Y-%m-%dT%H:%M")
+                end_string = f"{year}-{month_number}-{day_of_the_month}T{end_hour}"
+                ev_end = datetime.strptime(end_string, "%Y-%m-%dT%H:%M")
+                
+
+                ev = Event(summary=summary, start=ev_start, end=ev_end)
+                calendar.events.append(ev)
+
+    return IcsCalendarStream.calendar_to_ics(calendar)
+
+def parse_plansoft_tree(tree: BeautifulSoup) -> (dict, dict):
     hours = {} # map DAY: hours[][] "pon" -> 1-2 [1 1 1],  
     days = {} # map DAY: day[] "pon" -> 10 IV, 11 IV ...
 
+    trs = tree.find_all("tr")
     day_regex = re.compile("^[0-9]+ [A-Z]+$")
     hour_regex = re.compile("^ [0-9]+\-[0-9]+$") # NOTE the space at the start
 
-    # init hours and days
+    # initialize
     day_of_week = ""
     for tr in trs:
         tds = tr.find_all("td")
@@ -46,9 +68,7 @@ def GenerateIcal(plansoft: str) -> str:
             hours[day_of_week] = {}
             days[day_of_week] = []
 
-
     # import day numbers
-
     for tr in trs:
         tds = tr.find_all("td")
         if tds[0].string in DAYS:
@@ -60,7 +80,6 @@ def GenerateIcal(plansoft: str) -> str:
                 continue
             if day_regex.match(c):
                 days[day_of_week].append(c)
-
 
     # import hours
     day_of_week = ""
@@ -81,8 +100,7 @@ def GenerateIcal(plansoft: str) -> str:
 
     # finally parse the schedule
     day_of_week = ""
-    hour_of_day = ""
-    for tr_idx, tr in enumerate(trs):
+    for tr in trs:
         tds = tr.find_all("td")
         if tds[0].string in DAYS:
             day_of_week = tds[0].string
@@ -94,7 +112,7 @@ def GenerateIcal(plansoft: str) -> str:
             continue
         current_hour = tds[0].string
         h_pos = 0
-        for i, td in enumerate(tds[1:]):
+        for td in tds[1:]:
             txt = td.get_text("|", strip=True)
             colspan = 1
             if "colspan" in td.attrs:
@@ -141,29 +159,9 @@ def GenerateIcal(plansoft: str) -> str:
                     hours[day_name][new_hour][h_pos] = (txt, 1)
                     row_index += 1
 
+    return (hours, days)
 
-    # generate ical
-    calendar = Calendar()
-
-    for day_name in hours:
-        for hour_block in hours[day_name]:
-            for h_pos, event in enumerate(hours[day_name][hour_block]):
-                day_month = days[day_name][h_pos]
-                (day_of_the_month, month_number_roman) = day_month.split(" ")
-                month_number = ROMAN_TO_MONTH.index(month_number_roman) + 1
-                summary = event[0]
-                (start_hour, end_hour) = HOUR_TRANSLATION[hour_block]
-                year = datetime.now().year
-
-                if summary == "-":
-                    continue
-
-                print(f"{year}-{month_number}-{day_of_the_month}T{start_hour} ----- {summary}")
-                ev_start = datetime.strptime(f"{year}-{month_number}-{day_of_the_month}T{start_hour}", "%Y-%m-%dT%H:%M")
-                ev_end = datetime.strptime(f"{year}-{month_number}-{day_of_the_month}T{end_hour}", "%Y-%m-%dT%H:%M")
-                
-
-                ev = Event(summary=summary, start=ev_start, end=ev_end)
-                calendar.events.append(ev)
-
-    return IcsCalendarStream.calendar_to_ics(calendar)
+def generate_ical(plansoft: str) -> str:
+    tree = BeautifulSoup(plansoft, "html.parser")
+    (hours, days) = parse_plansoft_tree(tree)
+    return create_calendar(hours, days)
