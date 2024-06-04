@@ -39,7 +39,6 @@ def create_calendar(hours: dict, days: dict) -> str:
                 if summary == "-":
                     continue
 
-                print(f"{year}-{month_number}-{day_of_the_month}T{start_hour} ----- {summary}")
                 start_string = f"{year}-{month_number}-{day_of_the_month}T{start_hour}"
                 ev_start = datetime.strptime(start_string, "%Y-%m-%dT%H:%M")
                 end_string = f"{year}-{month_number}-{day_of_the_month}T{end_hour}"
@@ -57,7 +56,7 @@ def parse_plansoft_tree(tree: BeautifulSoup) -> (dict, dict):
 
     trs = tree.find_all("tr")
     day_regex = re.compile("^[0-9]+ [A-Z]+$")
-    hour_regex = re.compile("^ [0-9]+\-[0-9]+$") # NOTE the space at the start
+    hour_regex = re.compile("^ [0-9]+-[0-9]+$") # NOTE the space at the start
 
     # initialize
     day_of_week = ""
