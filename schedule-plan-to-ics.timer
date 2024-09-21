@@ -1,0 +1,12 @@
+[Unit]
+Description=Schedule a plan update
+RefuseManualStart=no
+RefuseManualStop=no
+
+[Timer]
+Persistent=true
+OnCalendar=*-*-* 22:00:00
+Unit=plan-to-ics.service
+
+[Install]
+WantedBy=timers.target

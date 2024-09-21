@@ -1,0 +1,10 @@
+[Unit]
+Description=Update calendars
+
+[Service]
+Type=simple
+ExecStart=update.sh
+WorkingDirectory=/home/watrunner/plan-to-ics
+
+[Install]
+WantedBy=default.target
