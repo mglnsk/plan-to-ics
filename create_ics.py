@@ -52,10 +52,13 @@ def create_calendar(hours: dict, days: dict) -> str:
                 summary = event[0]
                 (start_hour, end_hour) = HOUR_TRANSLATION[hour_block]
 
-                year = datetime.now().year  # FIXME what about january right now
+                year = datetime.now().year
                 if datetime.now().month >= 9:
                     if month_number < 9:
                         year += 1
+                else:
+                    if month_number >= 9:
+                        year -= 1
 
                 if summary == "-":
                     continue
