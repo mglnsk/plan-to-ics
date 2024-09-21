@@ -3,3 +3,5 @@ deploy/
 venv/
 *.html
 *.ics
+*.txt
+calendars/
