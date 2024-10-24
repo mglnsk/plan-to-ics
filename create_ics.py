@@ -32,6 +32,15 @@ HOUR_TRANSLATION = {
     " 11-12": ("17:35", "19:10"),
     " 13-14": ("19:25", "21:00"),
 }
+HOUR_TRANSLATION_NEW = {
+    " 1-2": ("8:00", "9:35"),
+    " 3-4": ("9:50", "11:25"),
+    " 5-6": ("11:40", "13:15"),
+    " 7-8": ("13:30", "15:05"),
+    " 9-10": ("16:00", "17:35"),
+    " 11-12": ("17:50", "19:25"),
+    " 13-14": ("19:40", "21:15"),
+}
 
 
 def log(level: str, message):
@@ -50,8 +59,6 @@ def create_calendar(hours: dict, days: dict) -> str:
                 (day_of_the_month, month_number_roman) = day_month.split(" ")
                 month_number = ROMAN_TO_MONTH.index(month_number_roman) + 1
                 summary = event[0]
-                (start_hour, end_hour) = HOUR_TRANSLATION[hour_block]
-
                 year = datetime.now().year
                 if datetime.now().month >= 9:
                     if month_number < 9:
@@ -62,6 +69,12 @@ def create_calendar(hours: dict, days: dict) -> str:
 
                 if summary == "-":
                     continue
+
+                # Handle transition to new hours
+                (start_hour, end_hour) = HOUR_TRANSLATION_NEW[hour_block]
+                if year <= 2024 and month_number <= 11 and day_of_the_month < 4:
+                    (start_hour, end_hour) = HOUR_TRANSLATION[hour_block]
+
 
                 start_string = f"{year}-{month_number}-{day_of_the_month}T{start_hour}"
                 ev_start = datetime.strptime(start_string, "%Y-%m-%dT%H:%M")
