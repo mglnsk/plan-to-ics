@@ -72,7 +72,7 @@ def create_calendar(hours: dict, days: dict) -> str:
 
                 # Handle transition to new hours
                 (start_hour, end_hour) = HOUR_TRANSLATION_NEW[hour_block]
-                if year <= 2024 and month_number <= 11 and day_of_the_month < 4:
+                if year <= 2024 and month_number <= 11 and int(day_of_the_month) < 4:
                     (start_hour, end_hour) = HOUR_TRANSLATION[hour_block]
 
 
