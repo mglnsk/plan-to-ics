@@ -10,4 +10,5 @@ do
     sleep $((RANDOM % 8))
 done < list.txt
 
+rsync -a calendars/ ~/wat/static/calendars/
 rsync -a calendars/ /var/www/wat/calendars/

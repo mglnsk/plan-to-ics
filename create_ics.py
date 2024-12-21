@@ -200,6 +200,9 @@ def parse_plansoft_tree(tree: BeautifulSoup) -> tuple[dict, dict]:
 
 def generate_ical(plansoft: str) -> str:
     tree = BeautifulSoup(plansoft, "html.parser")
+    invalid_elements = tree.findAll("td", {"background" : "outofrange.gif"})
+    for el in invalid_elements:
+        el.decompose()
     (hours, days) = parse_plansoft_tree(tree)
     return create_calendar(hours, days)
 
