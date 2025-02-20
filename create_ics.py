@@ -215,11 +215,22 @@ def get_html(url: str) -> str:
 
 def build_link_to_id(id: str) -> str:
     prefix_path = "https://wml.wat.edu.pl/wp-content/uploads/rozklady_zajec/"
+    day = datetime.now().day
     month = datetime.now().month
     year = datetime.now().year
-    if month < 3:
+    if month == 1: # Januray -- always sem_zima
         return f"{prefix_path}{year-1}_sem_zima/{id}.htm"
-    elif month < 9:
+    elif month == 2: # February -- zima or lato?
+        try:
+            if day > 15: # zima
+                lato_path = f"{prefix_path}{year-1}_sem_lato/index.xml"
+                r = httpx.head(lato_path)
+                if r.status_code == 200:
+                    return f"{prefix_path}{year-1}_sem_lato/{id}.htm"
+        # lato
+        finally:
+            return f"{prefix_path}{year-1}_sem_zima/{id}.htm"
+    elif month < 9: # months up to september -- lato
         return f"{prefix_path}{year-1}_sem_lato/{id}.htm"
     return f"{prefix_path}{year}_sem_zima/{id}.htm"
 
@@ -278,10 +289,6 @@ def main():
         log("ERROR", f"generic http error -- {e}")
     except Exception as e:
         log("ERROR", f"generic error -- {e}")
-
-    # with open("plansoft.html", encoding='windows-1250') as f:
-    #     tree = BeautifulSoup(f, 'html.parser')
-
 
 if __name__ == "__main__":
     main()
